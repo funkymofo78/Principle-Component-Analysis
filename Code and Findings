@@ -1,0 +1,107 @@
+```{R}
+str(rock)
+help(rock)
+pairs(rock)
+
+#Investigate if clustering is suitable for this  data and perform suitable clustering. Create plots to visualise these clusters and interpret them
+
+mydata<-rock
+colnames(rock)<-colnames(rock)
+length(which(is.na(rock)==TRUE))
+
+mydata<- scale(mydata) # standardise variables
+
+dev.off()
+wss <- (nrow(mydata)-1)*sum(apply(mydata,2,var))
+for (i in 2:10){
+  wss[i] <- sum(kmeans(mydata, centers=i,nstart=1)$withinss)
+}  
+plot(1:10, wss, type="b", xlab="Number of Clusters",
+     ylab="Within Clusters Sum of Squares")
+
+
+#2  clusters
+
+
+
+plot(1:10, wss, type="b", xlab="Number of Clusters",
+     ylab="Within Clusters Sum of Squares")
+kmaeans_2_rocks<-kmeans(mydata,2,nstart=3)
+
+
+
+pairs(rock,col=kmaeans_2_rocks$cluster)
+print(kmaeans_2_rocks)
+
+```
+
+#Compute the covariance and correlation matrix of the data .
+#Standardise the data and compute the covariance matrix.
+
+```{R}
+
+cov(rock) # describes shared variability between 2 variables
+cor(rock) #pearson correlation
+var(rock$area)
+#c on scaled data
+cov(mydata)
+#calculating the covariance on a scaled matrix creates the cor matrix
+
+```
+
+
+#Compute the eigenvalues and eigenvectors for the covariance matrix of the standardised data using command eigen()
+#Run a principle components analysis in R using prcomp(). Determine the number of principle components to use using the output and suitable plots.
+#Interpret the loadings of the principle components
+#Plot these principle components with clustering. Interpret these results.
+
+
+```{R}
+help(eigen)
+e<-eigen(cov(mydata))
+e
+plot(1:length(e$values),e$values,type="b")
+sqrt(e$values) #standard deviation of the PCs
+
+
+```
+
+```{R}
+
+help(prcomp)
+pca<-prcomp(mydata) #run PCA
+plot(pca,type="l") #plot screeplot
+summary(pca)
+print(pca)
+pca$rotation
+#2 pc as the elbow pt occurs at 2 and they 
+#both explain 88% of the variation
+#PC1 has high loading on area and peri, with low 
+#loading (low average weight) for shape and perm
+#so that means high values here will be for rocks
+#with large surfaces but low permeability
+#PC2 has low loadings for all varibales but
+# for area and shape in particular, so rocks here
+#will have generally low area (surface) and low shape
+
+
+plot(pca$x[,1],pca$x[,2],xlab="PC 1", ylab="PC 2")
+plot(pca$x[,1],pca$x[,2],xlab="PC 1", ylab="PC 2",
+     col=kmaeans_2_rocks$cluster,pch=kmaeans_2_rocks$cluster)
+
+pairs(pca$x[,1:2],col=kmaeans_2_rocks$cluster,pch=kmaeans_2_rocks$cluster)
+help("identify")
+
+plot(pca$x[,1],pca$x[,2],xlab="PC 1", ylab="PC 2",
+     col=kmaeans_2_rocks$cluster,pch=kmaeans_2_rocks$cluster)
+
+#select obs numbers on the graph
+identify(pca$x[,2]~pca$x[,1],atpen=TRUE)
+
+
+
+```
+
+
+
+
